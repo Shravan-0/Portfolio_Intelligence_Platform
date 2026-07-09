@@ -1,0 +1,51 @@
+import axios from "axios";
+
+const API_URL = "http://127.0.0.1:8000";
+
+export const getRiskProfile = async (
+  profileId
+) => {
+
+  const response =
+    await axios.get(
+      `${API_URL}/risk/profile/${profileId}`
+    );
+
+  return response.data;
+};
+
+export const getPortfolioRisk = async (
+  portfolioId
+) => {
+
+  const response =
+    await axios.get(
+      `${API_URL}/risk/portfolio/${portfolioId}`
+    );
+
+  return response.data;
+};
+
+export const getAssetAllocation = async (
+  portfolioId
+) => {
+
+  const response =
+    await axios.get(
+      `${API_URL}/risk/allocation/${portfolioId}`
+    );
+
+  return response.data;
+};
+
+export const getDiversification = async (
+  portfolioId
+) => {
+
+  const response =
+    await axios.get(
+      `${API_URL}/risk/diversification/${portfolioId}`
+    );
+
+  return response.data;
+};

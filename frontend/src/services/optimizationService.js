@@ -1,0 +1,37 @@
+import axios from "axios";
+
+const API_URL = "http://127.0.0.1:8000";
+
+export const getRebalance = async (
+  profileId
+) => {
+
+  const response =
+    await axios.get(
+      `${API_URL}/optimization/rebalance/${profileId}`
+    );
+
+  return response.data;
+};
+
+export const getRecommendations =
+  async (profileId) => {
+
+    const response =
+      await axios.get(
+        `${API_URL}/optimization/recommendations/${profileId}`
+      );
+
+    return response.data;
+};
+
+export const getPortfolioHealth =
+  async (portfolioId) => {
+
+    const response =
+      await axios.get(
+        `${API_URL}/optimization/health/${portfolioId}`
+      );
+
+    return response.data;
+};

@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 
 import AnalyticsPanel from "./AnalyticsPanel";
-import { GUIDANCE } from "./GuidancePanel";
+import { GUIDANCE } from "./guidanceUtils";
 
 import {
   getGoalProbability,
@@ -33,10 +33,6 @@ export default function GoalProbabilityWidget() {
     error,
     setError
   ] = useState(null);
-
-  useEffect(() => {
-    fetchProbability();
-  }, []);
 
   const fetchProbability = async () => {
     setLoading(true);
@@ -109,6 +105,15 @@ export default function GoalProbabilityWidget() {
 
   };
 
+  useEffect(() => {
+    const init = async () => {
+        await fetchProbability();
+    };
+
+    init();
+}, []);
+
+
   if (loading) {
     return (
       <AnalyticsPanel title="Goal Success Probability">
@@ -151,7 +156,7 @@ export default function GoalProbabilityWidget() {
 
       <Box
         sx={{
-          minHeight: 220,
+          minHeight: 180,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center"

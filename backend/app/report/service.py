@@ -21,14 +21,13 @@ from app.optimization.service import (
 )
 
 from app.performance.service import (
+    calculate_live_portfolio_value_and_returns,
     get_benchmark_comparison,
 )
 
 from app.models.portfolio import Portfolio
 from app.models.investor_profile import InvestorProfile
-from app.models.portfolio_asset import PortfolioAsset
 from app.models.report_history import ReportHistory
-from app.services.analytics_service import calculate_total_value
 
 REPORT_TYPE_PORTFOLIO = "portfolio"
 REPORT_STATUS_GENERATED = "Generated"
@@ -103,12 +102,8 @@ def _build_portfolio_pdf(
         else "Underperforming"
     )
 
-    assets = (
-        db.query(PortfolioAsset)
-        .filter(PortfolioAsset.portfolio_id == portfolio_id)
-        .all()
-    )
-    total_value = calculate_total_value(assets)
+    valuation = calculate_live_portfolio_value_and_returns(db, portfolio_id)
+    total_value = valuation["total_value"]
 
     doc = SimpleDocTemplate(
         str(pdf_path)
@@ -118,7 +113,7 @@ def _build_portfolio_pdf(
 
     content = [
         Paragraph(
-            "StratFolio Portfolio Report",
+            "Diversified Portfolio Report",
             styles["Title"],
         ),
 

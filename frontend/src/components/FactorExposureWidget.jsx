@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 
 import AnalyticsPanel from "./AnalyticsPanel";
-import { GUIDANCE } from "./GuidancePanel";
+import { GUIDANCE } from "./guidanceUtils";
 
 import {
   getFactorExposure
@@ -26,9 +26,6 @@ export default function FactorExposureWidget() {
   const [guidance, setGuidance] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchExposure();
-  }, []);
 
   const fetchExposure = async () => {
     setLoading(true);
@@ -62,6 +59,14 @@ export default function FactorExposureWidget() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const init = async () => {
+        await fetchExposure();
+    };
+
+    init();
+}, []);
 
   if (loading) {
   return (
@@ -120,7 +125,7 @@ export default function FactorExposureWidget() {
             </Typography>
 
             <Typography>
-              {factor.exposure}%
+              {Number(factor.exposure || 0).toFixed(2)}%
             </Typography>
           </Box>
 

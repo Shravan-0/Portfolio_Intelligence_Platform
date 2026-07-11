@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import axios from "axios";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import "simplebar-react/dist/simplebar.min.css";
 
 import App from "./App";
 import theme from "./theme/theme";

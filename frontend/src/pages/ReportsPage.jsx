@@ -29,7 +29,7 @@ import {
 import DashboardLayout from "../layouts/DashboardLayout";
 import SummaryCard from "../components/SummaryCard";
 import PageLoader from "../components/PageLoader";
-import { ServerErrorAlert } from "../components/GuidancePanel";
+import ServerErrorAlert from "../components/ServerErrorAlert";
 import {
   downloadReportVersion,
   generatePortfolioReport,
@@ -257,7 +257,7 @@ export default function ReportsPage() {
         fontWeight={700}
         mb={1}
       >
-        Reports
+      
       </Typography>
 
       <Typography

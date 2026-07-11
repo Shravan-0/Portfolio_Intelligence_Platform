@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.portfolio_asset import (
     PortfolioAsset
 )
+from app.performance.service import calculate_live_asset_valuations
 
 
 def get_factor_exposure(
@@ -18,9 +19,12 @@ def get_factor_exposure(
         .all()
     )
 
+    valuations = calculate_live_asset_valuations(db, portfolio_id)
+    total_value = sum(item["market_value"] for item in valuations)
     exposure_map = {}
 
-    for asset in assets:
+    for valuation in valuations:
+        asset = valuation["asset"]
 
         exposure_map.setdefault(
             asset.asset_type,
@@ -29,7 +33,11 @@ def get_factor_exposure(
 
         exposure_map[
             asset.asset_type
-        ] += asset.allocation_percent
+        ] += (
+            (valuation["market_value"] / total_value) * 100
+            if total_value > 0
+            else 0.0
+        )
 
     return [
         {

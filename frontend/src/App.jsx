@@ -8,7 +8,7 @@ import {
 import DashboardPage from "./pages/DashboardPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
-import GoalsPage from "./pages/GoalsPage";
+
 import SettingsPage from "./pages/SettingsPage";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -78,14 +78,7 @@ function App() {
         }
       />
 
-      <Route
-        path="/goals"
-        element={
-          <ProtectedRoute>
-            <GoalsPage />
-          </ProtectedRoute>
-        }
-      />
+      
       <Route
         path="/profile"
         element={

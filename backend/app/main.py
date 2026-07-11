@@ -58,7 +58,7 @@ from app.performance.router import (
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="StratFolio",
+    title="Portfolio_Intelligence_Platform",
     version="1.0.0"
 )
 
@@ -137,7 +137,7 @@ app.include_router(
 @app.get("/")
 def root():
     return {
-        "message": "Welcome to StratFolio API"
+        "message": "Welcome to Portfolio_Intelligence_Platform API"
     }
 
 

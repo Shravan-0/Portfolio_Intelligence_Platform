@@ -27,10 +27,6 @@ export default function EfficientFrontierWidget() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchFrontier();
-  }, []);
-
   const fetchFrontier = async () => {
     setLoading(true);
     setError(null);
@@ -48,6 +44,14 @@ export default function EfficientFrontierWidget() {
     }
   };
 
+  useEffect(() => {
+    const init = async () => {
+        await fetchFrontier();
+    };
+
+    init();
+}, []);
+
   if (loading) {
   return (
     <AnalyticsPanel
@@ -55,7 +59,7 @@ export default function EfficientFrontierWidget() {
     >
       <Skeleton
         variant="rectangular"
-        height={450}
+        height={340}
       />
     </AnalyticsPanel>
   );

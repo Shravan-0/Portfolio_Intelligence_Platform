@@ -16,15 +16,13 @@ import {
   Alert,
   Divider,
   Card,
-  CardContent
+  CardContent,
+  Paper
 } from "@mui/material";
 
 import DashboardLayout from "../layouts/DashboardLayout";
-import {
-  GuidancePanel,
-  ServerErrorAlert,
-  GUIDANCE
-} from "../components/GuidancePanel";
+import ServerErrorAlert from "../components/ServerErrorAlert";
+import { GUIDANCE } from "../components/guidanceUtils";
 import { classifyApiError } from "../utils/apiErrors";
 
 import {
@@ -258,30 +256,41 @@ export default function GoalsPage() {
 
   return (
     <DashboardLayout>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Box>
-          <Typography variant="h4" fontWeight={700} mb={1}>
-            Financial Goals
-          </Typography>
-          <Typography color="#64748B">
-            
-          </Typography>
-        </Box>
-        {!goal && (
-          <Button variant="contained" onClick={handleOpenCreate}>
-            Create Goal
-          </Button>
-        )}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        flexDirection={{ xs: "column", sm: "row" }}
+        gap={2}
+        mb={4}
+      >
+        <Typography variant="h4" fontWeight={700}>
+          Financial Goals
+        </Typography>
+        
       </Box>
 
       {!goal ? (
-        <GuidancePanel
-          title={GUIDANCE.goalNotFound.title}
-          message={GUIDANCE.goalNotFound.message}
-          actionLabel="Create Goal Now"
-          actionTo="#" // Handled by clicking the button directly
-         
-        />
+        // Fixed: previously used GuidancePanel with actionTo="#", which
+        // rendered a RouterLink to a dead anchor. This now triggers the
+        // real create-goal dialog via handleOpenCreate.
+        <Paper
+          sx={{
+            p: 4,
+            maxWidth: 640,
+            bgcolor: "background.paper"
+          }}
+        >
+          <Typography variant="h5" fontWeight={700} mb={1}>
+            {GUIDANCE.goalNotFound.title}
+          </Typography>
+          <Typography color="text.secondary" mb={3}>
+            {GUIDANCE.goalNotFound.message}
+          </Typography>
+          <Button variant="contained" onClick={handleOpenCreate}>
+            Create Goal Now
+          </Button>
+        </Paper>
       ) : (
         <Box>
           <Box display="flex" gap={2} mb={4} justifyContent="flex-end">
@@ -296,26 +305,26 @@ export default function GoalsPage() {
           <Grid container spacing={3}>
             {/* Goal Progress Card */}
             <Grid xs={12} md={6}>
-              <Card sx={{ bgcolor: "#131C2F", borderRadius: 3, border: "1px solid rgba(255,255,255,0.05)", height: "100%" }}>
+              <Card sx={{ bgcolor: "background.paper", borderRadius: 3, height: "100%" }}>
                 <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h6" fontWeight={700} mb={3} color="#FFFFFF">
+                  <Typography variant="h6" fontWeight={700} mb={3}>
                     Goal Progress: {goal.goal_name}
                   </Typography>
 
                   <Box display="flex" justifyContent="space-between" mb={1}>
-                    <Typography color="#94A3B8" variant="body2">Current Savings</Typography>
-                    <Typography color="#FFFFFF" fontWeight={600}>{formatAmount(goal.current_amount)}</Typography>
+                    <Typography color="text.secondary" variant="body2">Current Savings</Typography>
+                    <Typography fontWeight={600}>{formatAmount(goal.current_amount)}</Typography>
                   </Box>
 
                   <Box display="flex" justifyContent="space-between" mb={3}>
-                    <Typography color="#94A3B8" variant="body2">Target Amount</Typography>
-                    <Typography color="#3B82F6" fontWeight={700}>{formatAmount(goal.target_amount)}</Typography>
+                    <Typography color="text.secondary" variant="body2">Target Amount</Typography>
+                    <Typography color="primary.main" fontWeight={700}>{formatAmount(goal.target_amount)}</Typography>
                   </Box>
 
                   <Box mb={4}>
                     <Box display="flex" justifyContent="space-between" mb={1}>
-                      <Typography color="#64748B" variant="caption">Progress</Typography>
-                      <Typography color="#22C55E" variant="caption" fontWeight={600}>
+                      <Typography color="text.secondary" variant="caption">Progress</Typography>
+                      <Typography color="success.main" variant="caption" fontWeight={600}>
                         {goal.progress_percent != null ? `${goal.progress_percent}%` : "0.0%"}
                       </Typography>
                     </Box>
@@ -325,27 +334,27 @@ export default function GoalsPage() {
                       sx={{
                         height: 8,
                         borderRadius: 4,
-                        bgcolor: "rgba(255,255,255,0.05)",
+                        bgcolor: "rgba(148,163,184,0.12)",
                         "& .MuiLinearProgress-bar": {
-                          bgcolor: "#22C55E",
+                          bgcolor: "success.main",
                           borderRadius: 4
                         }
                       }}
                     />
                   </Box>
 
-                  <Divider sx={{ my: 3, borderColor: "rgba(255,255,255,0.05)" }} />
+                  <Divider sx={{ my: 3 }} />
 
                   <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
                     <Box>
-                      <Typography color="#64748B" variant="caption">Monthly Contribution</Typography>
-                      <Typography color="#FFFFFF" variant="h6" fontWeight={700} mt={0.5}>
+                      <Typography color="text.secondary" variant="caption">Monthly Contribution</Typography>
+                      <Typography variant="h6" fontWeight={700} mt={0.5}>
                         {formatAmount(goal.monthly_contribution)}
                       </Typography>
                     </Box>
                     <Box>
-                      <Typography color="#64748B" variant="caption">Target Date</Typography>
-                      <Typography color="#FFFFFF" variant="h6" fontWeight={700} mt={0.5}>
+                      <Typography color="text.secondary" variant="caption">Target Date</Typography>
+                      <Typography variant="h6" fontWeight={700} mt={0.5}>
                         {new Date(goal.target_date).toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
                       </Typography>
                     </Box>
@@ -356,10 +365,10 @@ export default function GoalsPage() {
 
             {/* Goal Success Card */}
             <Grid xs={12} md={6}>
-              <Card sx={{ bgcolor: "#131C2F", borderRadius: 3, border: "1px solid rgba(255,255,255,0.05)", height: "100%" }}>
+              <Card sx={{ bgcolor: "background.paper", borderRadius: 3, height: "100%" }}>
                 <CardContent sx={{ p: 4 }}>
                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                    <Typography variant="h6" fontWeight={700} color="#FFFFFF">
+                    <Typography variant="h6" fontWeight={700}>
                       Simulation Results
                     </Typography>
                     {goal.success_probability != null && (
@@ -381,37 +390,37 @@ export default function GoalsPage() {
                   </Box>
 
                   <Box display="flex" flexDirection="column" alignItems="center" my={2}>
-                    <Typography color="#94A3B8" variant="body2" mb={1}>Success Probability</Typography>
+                    <Typography color="text.secondary" variant="body2" mb={1}>Success Probability</Typography>
                     <Typography
                       variant="h2"
                       fontWeight={800}
                       sx={{
-                        color: goal.success_probability != null ? getStatusInfo(goal.success_probability).color : "#FFFFFF"
+                        color: goal.success_probability != null ? getStatusInfo(goal.success_probability).color : "text.primary"
                       }}
                     >
                       {goal.success_probability != null ? `${goal.success_probability}%` : "--"}
                     </Typography>
-                    <Typography variant="caption" color="#64748B" mt={1}>
+                    <Typography variant="caption" color="text.secondary" mt={1} textAlign="center">
                       Probability of achieving your target under Monte Carlo simulations
                     </Typography>
                   </Box>
 
-                  <Divider sx={{ my: 3, borderColor: "rgba(255,255,255,0.05)" }} />
+                  <Divider sx={{ my: 3 }} />
 
                   <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
                     <Box>
-                      <Typography color="#64748B" variant="caption">Projected Future Value</Typography>
-                      <Typography color="#FFFFFF" variant="h6" fontWeight={700} mt={0.5}>
+                      <Typography color="text.secondary" variant="caption">Projected Future Value</Typography>
+                      <Typography variant="h6" fontWeight={700} mt={0.5}>
                         {formatAmount(goal.estimated_future_value)}
                       </Typography>
                     </Box>
                     <Box>
-                      <Typography color="#64748B" variant="caption">Projected Gap</Typography>
+                      <Typography color="text.secondary" variant="caption">Projected Gap</Typography>
                       <Typography
                         variant="h6"
                         fontWeight={700}
                         mt={0.5}
-                        color={goal.remaining_gap > 0 ? "#EF4444" : "#22C55E"}
+                        color={goal.remaining_gap > 0 ? "error.main" : "success.main"}
                       >
                         {formatAmount(goal.remaining_gap)}
                       </Typography>
@@ -431,13 +440,13 @@ export default function GoalsPage() {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: { bgcolor: "#0F172A", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 3 }
+          sx: { bgcolor: "background.paper", borderRadius: 3 }
         }}
       >
-        <DialogTitle fontWeight={700} color="#FFFFFF">
+        <DialogTitle fontWeight={700}>
           {isEditMode ? "Edit Goal" : "Create Goal"}
         </DialogTitle>
-        <DialogContent dividers sx={{ borderColor: "rgba(255,255,255,0.1)", py: 3 }}>
+        <DialogContent dividers sx={{ py: 3 }}>
           <Grid container spacing={3}>
             <Grid xs={12}>
               <TextField
@@ -545,14 +554,14 @@ export default function GoalsPage() {
         open={openDeleteDialog}
         onClose={() => !submitting && setOpenDeleteDialog(false)}
         PaperProps={{
-          sx: { bgcolor: "#0F172A", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 3 }
+          sx: { bgcolor: "background.paper", borderRadius: 3 }
         }}
       >
-        <DialogTitle fontWeight={700} color="#FFFFFF">
+        <DialogTitle fontWeight={700}>
           Delete Goal
         </DialogTitle>
         <DialogContent>
-          <Typography color="#94A3B8">
+          <Typography color="text.secondary">
             Are you sure you want to delete this goal? This will permanently remove your financial goal and associated success metrics.
           </Typography>
         </DialogContent>
@@ -565,8 +574,7 @@ export default function GoalsPage() {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Snackbar notification */}
+      
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

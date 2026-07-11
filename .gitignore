@@ -84,3 +84,12 @@ htmlcov/
 
 # Local database (if used)
 *.sqlite3
+
+# Generated reports (optional)
+backend/reports/*.pdf
+
+# Project structure scratch files
+project_structure.txt
+
+*.bak
+*.orig

@@ -15,7 +15,6 @@ from app.services.portfolio_analytics_service import (
     calculate_dashboard,
     calculate_allocation_breakdown,
     calculate_risk_metrics,
-    calculate_health_score,
     calculate_hhi,
     calculate_exposure
 )
@@ -274,7 +273,20 @@ def get_portfolio_health(
 ):
     get_owned_portfolio(db, portfolio_id, current_user)
     try:
-        return calculate_health_score(db, portfolio_id)
+        from app.optimization.service import get_portfolio_health as get_health
+        from app.risk.service import calculate_diversification
+        
+        health_info = get_health(portfolio_id)
+        
+        assets = db.query(PortfolioAsset).filter(PortfolioAsset.portfolio_id == portfolio_id).all()
+        div_info = calculate_diversification(assets)
+        
+        return PortfolioHealthResponse(
+            health_score=float(health_info.health_score),
+            rating=health_info.rating,
+            diversification_score=float(div_info.get("score", 0.0)),
+            concentration_penalty=0.0
+        )
     except Exception as e:
         raise HTTPException(
             status_code=500,

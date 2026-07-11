@@ -6,5 +6,5 @@ class Portfolio(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    user_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=False, unique=True)
     total_value = Column(Float, default=0)

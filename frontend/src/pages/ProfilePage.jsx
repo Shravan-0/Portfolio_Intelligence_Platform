@@ -22,9 +22,7 @@ import {
 
 import DashboardLayout from "../layouts/DashboardLayout";
 import PageLoader from "../components/PageLoader";
-import {
-  ServerErrorAlert
-} from "../components/GuidancePanel";
+import ServerErrorAlert from "../components/ServerErrorAlert";
 import { classifyApiError } from "../utils/apiErrors";
 
 import {
@@ -408,9 +406,8 @@ return (
     <Typography
       variant="h4"
       fontWeight={700}
-      mb={10}
+      mb={3}
     >
-      Investor Profile
     </Typography>
 
     {loading && (
@@ -425,37 +422,32 @@ return (
     <Paper
 
   sx={{
-    p: 4,
+    p: { xs: 3, md: 4 },
     bgcolor: "#131C2F",
-    maxWidth: 1000,
-    mt:2,
-    pt:5,
+    width: "100%",
     borderRadius: 3
   }}
 >
-        <Typography
-          variant="h5"
-          pb={2}
-         fontWeight={600}
-        >
-          Goal Information
-        </Typography>
+       <Box sx={{ mb: 3 }}>
+  <Typography
+    variant="h5"
+    fontWeight={700}
+  >
+    Goal Information
+  </Typography>
+</Box>
 
         <Grid
           container
           spacing={3}
         >
-          <Grid xs={12} md={8}>
+          <Grid xs={12} sm={6} lg={3}
+md={6}>
             <TextField
               select
               fullWidth
               label="Goal Type"
               value={goalType}
-              sx={{
-  "& .MuiInputBase-root": {
-    width:170
-  }
-}}
               onChange={(e) =>
                 setGoalType(
                   e.target.value
@@ -488,23 +480,7 @@ return (
             </TextField>
           </Grid>
 
-          {goalType === "Other" && (
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="Custom Goal Name"
-                value={customGoal}
-                onChange={(e) =>
-                  setCustomGoal(
-                    e.target.value
-                  )
-                }
-              />
-            </Grid>
-          )}
-
-          <Grid xs={12} md={6}>
-            
+          <Grid xs={12} sm={6} md={3}>
             <TextField
               fullWidth
               label="Target Amount ($)"
@@ -530,7 +506,7 @@ return (
             />
           </Grid>
 
-          <Grid  xs={12} md={6}>
+          <Grid xs={12} sm={6} md={3}>
             <TextField
   fullWidth
   type="month"
@@ -548,7 +524,7 @@ return (
 />
           </Grid>
 
-          <Grid xs={12} md={6}>
+          <Grid xs={12} sm={6} md={3}>
             <TextField
               fullWidth
               label="Current Savings ($)"
@@ -574,7 +550,7 @@ return (
             />
           </Grid>
 
-          <Grid xs={12} md={6}>
+          <Grid xs={12} sm={6} md={3}>
             <TextField
               fullWidth
               label="Monthly Investment ($)"
@@ -599,28 +575,44 @@ return (
               }
             />
           </Grid>
+
+          {goalType === "Other" && (
+            <Grid xs={12} sm={6} md={3}>
+              <TextField
+                fullWidth
+                label="Custom Goal Name"
+                value={customGoal}
+                onChange={(e) =>
+                  setCustomGoal(
+                    e.target.value
+                  )
+                }
+              />
+            </Grid>
+          )}
         </Grid>
 
-        <Box mt={5}>
-          
+        <Box mt={2}>
+
       <Divider
   sx={{
-    my: 5
+    my: 4
   }}
 />
-          <Typography
-            variant="h6"
-            mb={3}
-            fontWeight={600}
-          >
-            Investor Information
-          </Typography>
+          <Box sx={{ mb: 3 }}>
+  <Typography
+    variant="h5"
+    fontWeight={700}
+  >
+    Investor Information
+  </Typography>
+</Box>
 
           <Grid
             container
             spacing={3}
           >
-            <Grid  xs={12} md={6}>
+            <Grid xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 label="Age"
@@ -647,7 +639,7 @@ return (
               />
             </Grid>
 
-            <Grid  xs={12} md={6}>
+            <Grid xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 label="Annual Income ($)"
@@ -673,7 +665,7 @@ return (
               />
             </Grid>
 
-            <Grid  xs={12} md={6}>
+            <Grid xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 label="Investment Horizon (Years)"
@@ -700,7 +692,7 @@ return (
               />
             </Grid>
 
-            <Grid  xs={12} md={6}>
+            <Grid xs={12} sm={6} md={3}>
               <TextField
                 select
                 fullWidth
@@ -708,11 +700,6 @@ return (
                 value={
                   riskTolerance
                 }
-                sx={{
-  "& .MuiInputBase-root": {
-    width:150
-  }
-}}
                 onChange={(e) =>
                   setRiskTolerance(
                     e.target.value
@@ -735,17 +722,28 @@ return (
           </Grid>
         </Box>
 
-        <Button
-  variant="contained"
-  size="large"
-  sx={{ mt: 4 }}
-  onClick={handleSubmit}
-  disabled={submitting}
+        <Box
+  sx={{
+    mt: 4,          // Try 6, 7 or 8
+    display: "flex",
+    justifyContent: "flex-start",
+  }}
 >
-  {submitting
-    ? "Saving..."
-    : "Save Investor Profile"}
-</Button>
+          <Button
+            variant="contained"
+            size="large"
+        
+            onClick={handleSubmit}
+            disabled={submitting}
+            sx={{ minWidth: 220 
+            
+             }}
+          >
+            {submitting
+              ? "Saving..."
+              : "Save Investor Profile"}
+          </Button>
+        </Box>
       </Paper>
     )}
     <Snackbar
@@ -761,7 +759,9 @@ return (
     onClose={handleSnackbarClose}
     severity={snackbar.severity}
     variant="filled"
-    sx={{ width: "100%" }}
+    sx={{  maxWidth: 1400,
+mx: "auto",
+width: "100%", }}
   >
     {snackbar.message}
   </Alert>

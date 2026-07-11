@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Typography, Skeleton } from "@mui/material";
 import AnalyticsPanel from "./AnalyticsPanel";
-import { GUIDANCE } from "./GuidancePanel";
+import { GUIDANCE } from "./guidanceUtils";
 import {
   resolveUserPortfolio
 } from "../utils/currentUser";

@@ -1,29 +1,147 @@
-from datetime import date
+from datetime import date, timedelta
+from typing import Any, Dict, List
 
 from sqlalchemy.orm import Session
 
+# Internal Model Imports
 from app.models.goal import Goal
 from app.models.performance_snapshot import PerformanceSnapshot
 from app.models.portfolio import Portfolio
 from app.models.portfolio_asset import PortfolioAsset
-from app.services.portfolio_analytics_service import (
-    calculate_health_score,
-    calculate_risk_metrics,
-    calculate_summary
-)
 
+# Service and Core Analytics Imports
+from app.market_data.service import get_crypto_price, get_stock_price
+from app.optimization.service import get_portfolio_health
+from app.risk.service import calculate_diversification
+from app.services.goal_probability import populate_goal_metrics
 
+# Global Constants
 BENCHMARK_RETURNS = {
     "NIFTY 50": 11.5,
     "S&P 500": 10.8,
-    "NASDAQ": 13.2
+    "NASDAQ": 13.2,
 }
 
 
-def _record_today_snapshot(
-    db: Session,
-    portfolio_id: int
-):
+def calculate_live_asset_valuations(
+    db: Session, portfolio_id: int
+) -> List[Dict[str, Any]]:
+    """Return the live market value and return percentage for every asset."""
+    assets = (
+        db.query(PortfolioAsset)
+        .filter(PortfolioAsset.portfolio_id == portfolio_id)
+        .all()
+    )
+
+    valuations = []
+    for asset in assets:
+        amount_invested = float(asset.amount_invested or 0.0)
+        quantity = float(asset.quantity or 0.0)
+        purchase_price = float(asset.purchase_price or 0.0)
+        price = None
+        previous_close = None
+
+        try:
+            if "crypto" in asset.asset_type.lower():
+                market_data = get_crypto_price(asset.ticker)
+            else:
+                market_data = get_stock_price(asset.ticker)
+            price = market_data.price
+            previous_close = market_data.previous_close
+        except Exception:
+            price = None
+            previous_close = None
+
+        if quantity <= 0:
+            reference_price = purchase_price or previous_close or price or amount_invested
+            quantity = amount_invested / reference_price if reference_price > 0 else 0.0
+
+        current_price = price if price and price > 0 else (
+            purchase_price or previous_close or (
+                amount_invested / quantity if quantity > 0 else 0.0
+            )
+        )
+        market_value = quantity * current_price
+        return_pct = (
+            ((market_value - amount_invested) / amount_invested) * 100
+            if amount_invested > 0
+            else 0.0
+        )
+
+        valuations.append({
+            "asset": asset,
+            "market_value": market_value,
+            "return_pct": return_pct,
+            "todays_gain_loss": (
+                (price - previous_close) * quantity
+                if price is not None and previous_close is not None
+                else 0.0
+            ),
+        })
+
+    return valuations
+
+
+def get_best_and_worst_performers(
+    db: Session, portfolio_id: int
+) -> tuple[PortfolioAsset | None, PortfolioAsset | None]:
+    """Select performance leaders using the holdings return percentage."""
+    valuations = calculate_live_asset_valuations(db, portfolio_id)
+    if not valuations:
+        return None, None
+
+    best = max(valuations, key=lambda item: item["return_pct"])
+    worst = min(valuations, key=lambda item: item["return_pct"])
+    return best["asset"], worst["asset"]
+
+
+def calculate_live_portfolio_value_and_returns(db: Session, portfolio_id: int) -> Dict[str, float]:
+    """
+    Calculates live portfolio values, total returns, and daily price fluctuations
+    by pulling current market prices for all assets within the portfolio.
+    """
+    valuations = calculate_live_asset_valuations(db, portfolio_id)
+    if not valuations:
+        return {
+            "total_value": 0.0,
+            "total_invested": 0.0,
+            "total_profit_loss": 0.0,
+            "total_return_pct": 0.0,
+            "todays_gain_loss_amt": 0.0,
+            "todays_gain_loss_pct": 0.0,
+        }
+
+    total_value = 0.0
+    total_invested = 0.0
+    todays_gain_loss_amt = 0.0
+
+    for valuation in valuations:
+        asset = valuation["asset"]
+        amount_invested = float(asset.amount_invested or 0.0)
+        total_invested += amount_invested
+        total_value += valuation["market_value"]
+        todays_gain_loss_amt += valuation["todays_gain_loss"]
+
+    total_profit_loss = total_value - total_invested
+    total_return_pct = (total_profit_loss / total_invested) * 100.0 if total_invested > 0 else 0.0
+
+    yesterday_value = total_value - todays_gain_loss_amt
+    todays_gain_loss_pct = (todays_gain_loss_amt / yesterday_value) * 100.0 if yesterday_value > 0 else 0.0
+
+    return {
+        "total_value": round(total_value, 2),
+        "total_invested": round(total_invested, 2),
+        "total_profit_loss": round(total_profit_loss, 2),
+        "total_return_pct": round(total_return_pct, 2),
+        "todays_gain_loss_amt": round(todays_gain_loss_amt, 2),
+        "todays_gain_loss_pct": round(todays_gain_loss_pct, 2),
+    }
+
+
+def _record_today_snapshot(db: Session, portfolio_id: int) -> PerformanceSnapshot:
+    """
+    Saves or updates the historical performance snapshot for the current day.
+    """
     live_metrics = calculate_live_portfolio_value_and_returns(db, portfolio_id)
     live_value = live_metrics["total_value"]
     today = date.today()
@@ -32,7 +150,7 @@ def _record_today_snapshot(
         db.query(PerformanceSnapshot)
         .filter(
             PerformanceSnapshot.portfolio_id == portfolio_id,
-            PerformanceSnapshot.date == today
+            PerformanceSnapshot.date == today,
         )
         .first()
     )
@@ -43,35 +161,27 @@ def _record_today_snapshot(
         snapshot = PerformanceSnapshot(
             portfolio_id=portfolio_id,
             date=today,
-            portfolio_value=live_value
+            portfolio_value=live_value,
         )
         db.add(snapshot)
 
     db.commit()
     db.refresh(snapshot)
-
     return snapshot
 
 
-def get_performance_history(
-    db: Session,
-    portfolio_id: int,
-    period: str = "max"
-):
-    _record_today_snapshot(
-        db,
-        portfolio_id
-    )
+def get_performance_history(db: Session, portfolio_id: int, period: str = "max") -> List[PerformanceSnapshot]:
+    """
+    Retrieves performance snapshots filtered by specific lookback periods.
+    """
+    _record_today_snapshot(db, portfolio_id)
 
     query = (
         db.query(PerformanceSnapshot)
-        .filter(
-            PerformanceSnapshot.portfolio_id == portfolio_id
-        )
+        .filter(PerformanceSnapshot.portfolio_id == portfolio_id)
         .order_by(PerformanceSnapshot.date.asc())
     )
 
-    from datetime import timedelta
     today = date.today()
     if period == "1w":
         query = query.filter(PerformanceSnapshot.date >= today - timedelta(days=7))
@@ -87,7 +197,10 @@ def get_performance_history(
     return query.all()
 
 
-def _calculate_portfolio_return(history):
+def _calculate_portfolio_return(history: List[PerformanceSnapshot]) -> float:
+    """
+    Helper function to calculate historical return percentage based on snapshots.
+    """
     if len(history) < 2:
         return 0.0
 
@@ -97,91 +210,50 @@ def _calculate_portfolio_return(history):
     if first_value <= 0:
         return 0.0
 
-    return round(
-        (
-            (latest_value - first_value) /
-            first_value
-        ) * 100,
-        2
-    )
+    return round(((latest_value - first_value) / first_value) * 100, 2)
 
 
-def get_benchmark_comparison(
-    db: Session,
-    portfolio_id: int,
-    benchmark: str = "S&P 500"
-):
-    history = get_performance_history(
-        db,
-        portfolio_id
-    )
+def get_benchmark_comparison(db: Session, portfolio_id: int, benchmark: str = "S&P 500") -> Dict[str, Any]:
+    """
+    Compares current live portfolio returns against traditional benchmark metrics to extract alpha.
+    """
+    # Fetch historical tracking data context
+    _ = get_performance_history(db, portfolio_id)
 
     normalized_benchmark = benchmark.upper()
-
     benchmark_name = next(
-        (
-            name
-            for name in BENCHMARK_RETURNS
-            if name.upper() == normalized_benchmark
-        ),
-        "S&P 500"
+        (name for name in BENCHMARK_RETURNS if name.upper() == normalized_benchmark),
+        "S&P 500",
     )
 
-    # NEW CODE
-    live_metrics = calculate_live_portfolio_value_and_returns(
-        db,
-        portfolio_id,
-    )
-
+    live_metrics = calculate_live_portfolio_value_and_returns(db, portfolio_id)
     portfolio_return = live_metrics["total_return_pct"]
-
-    benchmark_return = BENCHMARK_RETURNS[
-        benchmark_name
-    ]
+    benchmark_return = BENCHMARK_RETURNS[benchmark_name]
 
     return {
         "benchmark": benchmark_name,
         "portfolio_return": portfolio_return,
         "benchmark_return": benchmark_return,
-        "alpha": round(
-            portfolio_return - benchmark_return,
-            2
-        )
+        "alpha": round(portfolio_return - benchmark_return, 2),
     }
 
 
-def _get_goal_success(
-    db: Session,
-    portfolio_value: float,
-    user_id: int
-):
-    user_goal = (
-        db.query(Goal)
-        .filter(
-            Goal.user_id == user_id
-        )
-        .first()
-    )
-
-    if (
-        not user_goal or
-        user_goal.target_amount <= 0
-    ):
+def _get_goal_success(db: Session, user_id: int) -> float:
+    """
+    Determines success probability of a user's target financial goal.
+    """
+    goal = db.query(Goal).filter(Goal.user_id == user_id).first()
+    if not goal:
         return 0.0
 
-    return round(
-        min(
-            (
-                portfolio_value /
-                user_goal.target_amount
-            ) * 100,
-            100
-        ),
-        2
-    )
+    metrics = populate_goal_metrics(db, goal)
+    return metrics.get("success_probability", 0.0)
 
 
-def _get_rating(score: float):
+def _get_rating(score: float) -> str:
+    """
+    Converts a numerical portfolio score to an explicit grading classification.
+    """
     if score >= 85:
         return "A"
     if score >= 70:
@@ -191,186 +263,63 @@ def _get_rating(score: float):
     return "Needs Attention"
 
 
-def get_portfolio_scorecard(
-    db: Session,
-    portfolio_id: int
-):
-    summary = calculate_summary(
-        db,
-        portfolio_id
-    )
-    health = calculate_health_score(
-        db,
-        portfolio_id
-    )
-    risk_metrics = calculate_risk_metrics(
-        db,
-        portfolio_id
-    )
-    comparison = get_benchmark_comparison(
-        db,
-        portfolio_id
-    )
+def get_portfolio_scorecard(db: Session, portfolio_id: int) -> Dict[str, Any]:
+    """
+    Assembles a comprehensive evaluation score sheet across health, diversification, risk, and alpha.
+    """
+    from app.services.portfolio_analytics_service import calculate_risk_metrics
+
+    health = get_portfolio_health(portfolio_id)
+    risk_metrics = calculate_risk_metrics(db, portfolio_id)
+    comparison = get_benchmark_comparison(db, portfolio_id)
+    
     assets = (
         db.query(PortfolioAsset)
-        .filter(
-            PortfolioAsset.portfolio_id == portfolio_id
-        )
+        .filter(PortfolioAsset.portfolio_id == portfolio_id)
         .all()
     )
-    best_asset = max(
-    assets,
-    key=lambda asset: getattr(asset, "return_pct", float("-inf")),
-    default=None
-    )
 
-    worst_asset = min(
-    assets,
-    key=lambda asset: getattr(asset, "return_pct", float("inf")),
-    default=None
-    )
-    performance_score = max(
-        min(
-            60 + comparison["alpha"],
-            100
-        ),
-        0
-    )
-    portfolio = (
-        db.query(Portfolio)
-        .filter(
-            Portfolio.id == portfolio_id
-        )
-        .first()
-    )
+    best_asset, worst_asset = get_best_and_worst_performers(db, portfolio_id)
+
+    performance_score = max(min(60 + comparison["alpha"], 100), 0)
+    
+    portfolio = db.query(Portfolio).filter(Portfolio.id == portfolio_id).first()
     goal_success = 0.0
     if portfolio:
-        goal_success = _get_goal_success(
-            db,
-            summary["total_value"],
-            portfolio.user_id
-        )
+        goal_success = _get_goal_success(db, portfolio.user_id)
+
     risk_score = {
         "Low": 90,
         "Medium": 70,
-        "High": 45
-    }.get(
-        risk_metrics["concentration_risk"],
-        60
-    )
+        "High": 45,
+    }.get(risk_metrics.get("concentration_risk"), 60)
+
+    diversification = calculate_diversification(assets)
+    
     overall_score = (
-        health["health_score"] * 0.3 +
-        health["diversification_score"] * 0.2 +
+        health.health_score * 0.3 +
+        diversification.get("score", 0) * 0.2 +
         risk_score * 0.2 +
         performance_score * 0.15 +
         goal_success * 0.15
     )
 
     return {
-        "portfolio_health": health["health_score"],
-        "diversification": health[
-            "diversification_score"
-        ],
-        "risk": risk_metrics[
-            "concentration_risk"
-        ],
-        "performance": round(
-            performance_score,
-            2
-        ),
+        "portfolio_health": health.health_score,
+        "diversification": diversification.get("score", 0),
+        "risk": risk_metrics.get("concentration_risk", "Unknown"),
+        "performance": round(performance_score, 2),
         "goal_success": goal_success,
-        "overall_rating": _get_rating(
-            overall_score
-        ),
-        "best_performer": (
-            best_asset.ticker
-            if best_asset
-            else "None"
-        ),
-        "worst_performer": (
-            worst_asset.ticker
-            if worst_asset
-            else "None"
-        )
+        "overall_rating": _get_rating(overall_score),
+        "best_performer": best_asset.ticker if best_asset else "None",
+        "worst_performer": worst_asset.ticker if worst_asset else "None",
     }
 
 
-def calculate_live_portfolio_value_and_returns(db: Session, portfolio_id: int):
-    from app.models.portfolio_asset import PortfolioAsset
-    from app.market_data.service import get_stock_price, get_crypto_price
-
-    assets = db.query(PortfolioAsset).filter(PortfolioAsset.portfolio_id == portfolio_id).all()
-    if not assets:
-        return {
-            "total_value": 0.0,
-            "total_invested": 0.0,
-            "total_profit_loss": 0.0,
-            "total_return_pct": 0.0,
-            "todays_gain_loss_amt": 0.0,
-            "todays_gain_loss_pct": 0.0
-        }
-
-    total_value = 0.0
-    total_invested = 0.0
-    todays_gain_loss_amt = 0.0
-
-    for asset in assets:
-        ticker = asset.ticker
-        asset_type = asset.asset_type.lower()
-        amount_invested = asset.amount_invested or 0.0
-        total_invested += amount_invested
-
-        quantity = asset.quantity
-        purchase_price = asset.purchase_price
-        price = None
-        previous_close = None
-        try:
-            if "crypto" in asset_type:
-                market_data = get_crypto_price(ticker)
-            else:
-                market_data = get_stock_price(ticker)
-            price = market_data.price
-            previous_close = market_data.previous_close
-        except Exception:
-           price = purchase_price
-           previous_close = purchase_price
-
-        if not quantity:
-            ref_price = purchase_price or previous_close or price or amount_invested
-            quantity = amount_invested / ref_price if ref_price > 0 else 0.0
-
-        current_asset_price = price if price is not None else (purchase_price or previous_close or (amount_invested / quantity if quantity > 0 else 0.0))
-        asset_market_value = quantity * current_asset_price
-        asset.return_pct = (
-    ((asset_market_value - amount_invested) / amount_invested) * 100
-    if amount_invested > 0
-    else 0.0
-)
-        total_value += asset_market_value
-
-        if price is not None and previous_close is not None:
-            todays_gain_loss_amt += (price - previous_close) * quantity
-
-    total_profit_loss = total_value - total_invested
-    total_return_pct = (total_profit_loss / total_invested) * 100.0 if total_invested > 0 else 0.0
-
-    yesterday_value = total_value - todays_gain_loss_amt
-    todays_gain_loss_pct = (todays_gain_loss_amt / yesterday_value) * 100.0 if yesterday_value > 0 else 0.0
-
-    return {
-        "total_value": round(total_value, 2),
-        "total_invested": round(total_invested, 2),
-        "total_profit_loss": round(total_profit_loss, 2),
-        "total_return_pct": round(total_return_pct, 2),
-        "todays_gain_loss_amt": round(todays_gain_loss_amt, 2),
-        "todays_gain_loss_pct": round(todays_gain_loss_pct, 2)
-    }
-
-
-def get_portfolio_analytics(db: Session, portfolio_id: int):
-    from datetime import date, timedelta
-    from app.models.performance_snapshot import PerformanceSnapshot
-
+def get_portfolio_analytics(db: Session, portfolio_id: int) -> Dict[str, float]:
+    """
+    Computes time-weighted rolling performance windows (Daily, Weekly, Monthly) and CAGR.
+    """
     live_metrics = calculate_live_portfolio_value_and_returns(db, portfolio_id)
     current_value = live_metrics["total_value"]
 
@@ -381,7 +330,7 @@ def get_portfolio_analytics(db: Session, portfolio_id: int):
         .all()
     )
 
-    def get_snapshot_days_ago(days):
+    def get_snapshot_days_ago(days: int) -> Any:
         target_date = date.today() - timedelta(days=days)
         closest = None
         for snap in history:
@@ -428,5 +377,5 @@ def get_portfolio_analytics(db: Session, portfolio_id: int):
         "daily_return_pct": round(daily_return_pct, 2),
         "weekly_return_pct": round(weekly_return_pct, 2),
         "monthly_return_pct": round(monthly_return_pct, 2),
-        "cagr": round(cagr, 2)
+        "cagr": round(cagr, 2),
     }

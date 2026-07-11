@@ -24,12 +24,10 @@ import {
 import DashboardLayout from "../layouts/DashboardLayout";
 import SummaryCard from "../components/SummaryCard";
 import PageLoader from "../components/PageLoader";
-import {
-  GuidancePanel,
-  GuidanceAlert,
-  ServerErrorAlert,
-  GUIDANCE
-} from "../components/GuidancePanel";
+import GuidancePanel from "../components/GuidancePanel";
+import ServerErrorAlert from "../components/ServerErrorAlert";
+import { GUIDANCE } from "../components/guidanceUtils";
+import GuidanceAlert from "../components/GuidanceAlert";
 import {
   getBenchmarkComparison,
   getPerformanceHistory,
@@ -233,7 +231,7 @@ if (!userContext.hasAssets) {
     };
 
     loadDashboard();
-  }, []);
+  }, [selectedPeriod]);
 
   const chartData =
     useMemo(
@@ -332,7 +330,7 @@ if (setupMode === "needsAssets") {
         fontWeight={700}
         mb={1}
       >
-        Portfolio Overview
+
       </Typography>
 
       <Typography

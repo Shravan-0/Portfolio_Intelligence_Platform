@@ -1,9 +1,5 @@
 import { useState } from "react";
 
-import {
-  Typography
-} from "@mui/material";
-
 import DashboardLayout from "../layouts/DashboardLayout";
 import AnalyticsTabs from "../components/analytics/AnalyticsTabs";
 import Overview from "../components/analytics/Overview";
@@ -30,16 +26,12 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout>
-  <Typography variant="h4">
-    Analytics Dashboard
-  </Typography>
+      <AnalyticsTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
-  <AnalyticsTabs
-    activeTab={activeTab}
-    onTabChange={setActiveTab}
-  />
-
-  {renderActiveView()}
-</DashboardLayout>
+      {renderActiveView()}
+    </DashboardLayout>
   );
 }

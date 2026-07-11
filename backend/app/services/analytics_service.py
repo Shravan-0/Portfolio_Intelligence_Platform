@@ -17,15 +17,11 @@ def calculate_asset_count(assets):
 def get_largest_asset(assets):
     return max(
         assets,
-        key=lambda asset: asset.allocation_percent
+        key=lambda asset: float(asset.amount_invested or 0)
     )
 
 
-def calculate_diversification_score(assets):
-    return min(
-        len(assets) * 20,
-        100
-    )
+
 
 
 def calculate_concentration_level(
@@ -49,22 +45,7 @@ def calculate_hhi_score(assets):
     )
 
 
-def calculate_health_score(
-    diversification_score,
-    largest_weight
-):
-    concentration_penalty = (
-        largest_weight * 0.5
-    )
 
-    return round(
-        max(
-            diversification_score -
-            concentration_penalty,
-            0
-        ),
-        2
-    )
 
 
 def get_health_rating(

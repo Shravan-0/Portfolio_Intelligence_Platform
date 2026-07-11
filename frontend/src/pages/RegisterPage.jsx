@@ -168,7 +168,7 @@ export default function RegisterPage() {
           color="white"
           mb={1}
         >
-          StratFolio
+          Portfolio_Intelligence_Platform
         </Typography>
 
         <Typography

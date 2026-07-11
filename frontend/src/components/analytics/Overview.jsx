@@ -16,15 +16,9 @@ import SummaryCard from "../SummaryCard";
 
 import PageLoader from "../PageLoader";
 
-import {
-
-  GuidancePanel,
-
-  ServerErrorAlert,
-
-  getGuidanceForMissing
-
-} from "../GuidancePanel";
+import GuidancePanel from "../GuidancePanel";
+import ServerErrorAlert from "../ServerErrorAlert";
+import { getGuidanceForMissing } from "../guidanceUtils";
 
 
 
@@ -111,14 +105,6 @@ export default function AnalyticsPage() {
   const [guidance, setGuidance] =
 
     useState(null);
-
-
-
-  useEffect(() => {
-
-    loadAnalytics();
-
-  }, []);
 
 
 
@@ -375,6 +361,15 @@ export default function AnalyticsPage() {
     }
 
   };
+  
+  useEffect(() => {
+    const init = async () => {
+        await loadAnalytics();
+    };
+
+    init();
+}, []);
+
 
 
 
@@ -508,7 +503,7 @@ export default function AnalyticsPage() {
 
         <SummaryCard
 
-          title="Portfolio Value"
+          title="Projected Portfolio Value"
 
           value={
 

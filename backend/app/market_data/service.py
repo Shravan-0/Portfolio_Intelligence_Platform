@@ -24,7 +24,7 @@ def _fetch_yahoo_price(
     request = Request(
         url,
         headers={
-            "User-Agent": "StratFolio/1.0"
+            "User-Agent": "PortfolioIQ/1.0"
         }
     )
 

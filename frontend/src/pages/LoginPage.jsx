@@ -124,7 +124,7 @@ localStorage.setItem(
           align="center"
           mb={1}
         >
-          StratFolio
+          Portfolio Intelligence Platform
         </Typography>
 
         <Typography
@@ -132,7 +132,7 @@ localStorage.setItem(
           color="gray"
           mb={4}
         >
-          Portfolio Intelligence Platform
+          PortfolioIQ
         </Typography>
 
         <TextField

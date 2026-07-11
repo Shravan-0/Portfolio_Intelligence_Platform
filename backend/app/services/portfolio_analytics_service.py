@@ -2,10 +2,22 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.models.portfolio_asset import PortfolioAsset
 from app.models.portfolio import Portfolio
-from app.services.analytics_service import calculate_total_value
+from app.performance.service import calculate_live_asset_valuations
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _live_valuations(db: Session, portfolio_id: int):
+    valuations = calculate_live_asset_valuations(db, portfolio_id)
+    total_value = sum(item["market_value"] for item in valuations)
+    return valuations, total_value
+
+
+def _portfolio_weight(valuation, total_value: float) -> float:
+    return (valuation["market_value"] / total_value) * 100 if total_value > 0 else 0.0
+
+
 def calculate_summary(db: Session, portfolio_id: int):
     try:
         assets = (
@@ -22,16 +34,16 @@ def calculate_summary(db: Session, portfolio_id: int):
                 "largest_allocation": 0.0
             }
         
-        total_value = calculate_total_value(assets)
+        valuations, total_value = _live_valuations(db, portfolio_id)
         asset_count = len(assets)
-        largest_asset = max(assets, key=lambda asset: asset.allocation_percent)
+        largest_valuation = max(valuations, key=lambda item: item["market_value"])
         
         return {
             "portfolio_id": portfolio_id,
             "asset_count": asset_count,
             "total_value": total_value,
-            "largest_holding": largest_asset.ticker,
-            "largest_allocation": largest_asset.allocation_percent
+            "largest_holding": largest_valuation["asset"].ticker,
+            "largest_allocation": _portfolio_weight(largest_valuation, total_value)
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -54,17 +66,19 @@ def calculate_dashboard(db: Session, portfolio_id: int):
                 "average_allocation": 0.0
             }
         
-        total_value = calculate_total_value(assets)
+        valuations, total_value = _live_valuations(db, portfolio_id)
         asset_count = len(assets)
-        largest_asset = max(assets, key=lambda asset: asset.allocation_percent)
-        average_allocation = sum(asset.allocation_percent for asset in assets) / asset_count
+        largest_valuation = max(valuations, key=lambda item: item["market_value"])
+        average_allocation = sum(
+            _portfolio_weight(valuation, total_value) for valuation in valuations
+        ) / asset_count
         
         return {
             "portfolio_id": portfolio_id,
             "asset_count": asset_count,
             "total_value": total_value,
-            "largest_holding": largest_asset.ticker,
-            "largest_allocation": largest_asset.allocation_percent,
+            "largest_holding": largest_valuation["asset"].ticker,
+            "largest_allocation": _portfolio_weight(largest_valuation, total_value),
             "average_allocation": round(average_allocation, 2)
         }
     except Exception:
@@ -86,10 +100,12 @@ def calculate_allocation_breakdown(db: Session, portfolio_id: int):
         if not assets:
             return []
         
+        valuations, total_value = _live_valuations(db, portfolio_id)
         allocation_map = {}
-        for asset in assets:
+        for valuation in valuations:
+            asset = valuation["asset"]
             allocation_map.setdefault(asset.asset_type, 0.0)
-            allocation_map[asset.asset_type] += asset.allocation_percent
+            allocation_map[asset.asset_type] += _portfolio_weight(valuation, total_value)
             
         return [
             {
@@ -121,10 +137,12 @@ def calculate_risk_metrics(db: Session, portfolio_id: int):
                 "largest_position_weight": 0.0
             }
             
-        largest_asset = max(assets, key=lambda asset: asset.allocation_percent)
-        asset_count = len(assets)
-        diversification_score = min(asset_count * 20.0, 100.0)
-        largest_weight = largest_asset.allocation_percent
+        valuations, total_value = _live_valuations(db, portfolio_id)
+        largest_valuation = max(valuations, key=lambda item: item["market_value"])
+        from app.risk.service import calculate_diversification
+        div_result = calculate_diversification(assets)
+        diversification_score = float(div_result.get("score", 0.0))
+        largest_weight = _portfolio_weight(largest_valuation, total_value)
         
         if largest_weight >= 50:
             risk = "High"
@@ -136,59 +154,13 @@ def calculate_risk_metrics(db: Session, portfolio_id: int):
         return {
             "diversification_score": diversification_score,
             "concentration_risk": risk,
-            "largest_position": largest_asset.ticker,
+            "largest_position": largest_valuation["asset"].ticker,
             "largest_position_weight": largest_weight
         }
     except Exception:
        logger.exception("Failed to calculate portfolio analytics")
 
        raise HTTPException(
-        status_code=500,
-        detail="Failed to calculate portfolio analytics."
-    )
-
-
-def calculate_health_score(db: Session, portfolio_id: int):
-    try:
-        assets = (
-            db.query(PortfolioAsset)
-            .filter(PortfolioAsset.portfolio_id == portfolio_id)
-            .all()
-        )
-        if not assets:
-            return {
-                "health_score": 0.0,
-                "rating": "Poor",
-                "diversification_score": 0.0,
-                "concentration_penalty": 0.0
-            }
-            
-        asset_count = len(assets)
-        diversification_score = min(asset_count * 20.0, 100.0)
-        largest_asset = max(assets, key=lambda asset: asset.allocation_percent)
-        largest_weight = largest_asset.allocation_percent
-        concentration_penalty = largest_weight * 0.5
-        health_score = max(diversification_score - concentration_penalty, 0.0)
-        
-        if health_score >= 80:
-            rating = "Excellent"
-        elif health_score >= 60:
-            rating = "Good"
-        elif health_score >= 40:
-            rating = "Fair"
-        else:
-            rating = "Poor"
-            
-        return {
-            "health_score": round(health_score, 2),
-            "rating": rating,
-            "diversification_score": diversification_score,
-            "concentration_penalty": round(concentration_penalty, 2)
-        }
-    except Exception:
-      logger.exception("Failed to calculate portfolio analytics")
-
-      raise HTTPException(
         status_code=500,
         detail="Failed to calculate portfolio analytics."
     )
@@ -238,10 +210,12 @@ def calculate_exposure(db: Session, portfolio_id: int):
         if not assets:
             return []
             
+        valuations, total_value = _live_valuations(db, portfolio_id)
         exposure_map = {}
-        for asset in assets:
+        for valuation in valuations:
+            asset = valuation["asset"]
             exposure_map.setdefault(asset.asset_type, 0.0)
-            exposure_map[asset.asset_type] += asset.allocation_percent
+            exposure_map[asset.asset_type] += _portfolio_weight(valuation, total_value)
             
         risk_table = {
             "Stock": "Medium",

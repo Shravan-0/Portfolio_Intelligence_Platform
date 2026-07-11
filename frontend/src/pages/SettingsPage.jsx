@@ -15,27 +15,24 @@ export default function SettingsPage() {
   const [user, setUser] =
     useState(null);
 
-  useEffect(() => {
-    loadUser();
-  }, []);
 
-  const loadUser = async () => {
+ const loadUser = async () => {
     try {
       const token =
-  localStorage.getItem(
+   localStorage.getItem(
     "token"
-  );
+   );
 
-const response =
-  await axios.get(
-    "http://127.0.0.1:8000/auth/me",
+   const response =
+   await axios.get(
+     "http://127.0.0.1:8000/auth/me",
     {
       headers: {
         Authorization:
           `Bearer ${token}`
       }
     }
-  );
+   );
 
       setUser(response.data);
 
@@ -44,6 +41,15 @@ const response =
       
     }
   };
+
+  useEffect(() => {
+    const init = async () => {
+        await loadUser();
+    };
+
+    init();
+}, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem(
@@ -65,7 +71,7 @@ const response =
         fontWeight={700}
         mb={4}
       >
-        Settings
+      
       </Typography>
 
       <Grid

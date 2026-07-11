@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 
 import AnalyticsPanel from "./AnalyticsPanel";
-import { GUIDANCE } from "./GuidancePanel";
+import { GUIDANCE } from "./guidanceUtils";
 
 import {
   getMonteCarlo,
@@ -33,10 +33,6 @@ export default function MonteCarloWidget() {
 
   const [error, setError] =
     useState(null);
-
-  useEffect(() => {
-    fetchMonteCarlo();
-  }, []);
 
   const fetchMonteCarlo = async () => {
     setLoading(true);
@@ -94,6 +90,14 @@ export default function MonteCarloWidget() {
       setLoading(false);
     }
   };
+
+   useEffect(() => {
+    const init = async () => {
+        await fetchMonteCarlo();
+    };
+
+    init();
+}, []);
 
   if (loading) {
     return (

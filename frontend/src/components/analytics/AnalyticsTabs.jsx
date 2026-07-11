@@ -12,10 +12,11 @@ export default function AnalyticsTabs({
     <Paper
       elevation={0}
       sx={{
-        mb: 4,
+        mb: { xs: 3, md: 4 },
         borderRadius: 3,
         bgcolor: "#131C2F",
         border: "1px solid rgba(255,255,255,0.06)",
+        overflow: "hidden",
       }}
     >
       <Tabs
@@ -29,8 +30,12 @@ export default function AnalyticsTabs({
             color: "#94A3B8",
             fontWeight: 600,
             textTransform: "none",
-            fontSize: "0.95rem",
-            minHeight: 60,
+            fontSize: { xs: "0.875rem", sm: "0.95rem" },
+            minHeight: { xs: 52, sm: 60 },
+            transition: "color 180ms ease, background-color 180ms ease",
+            "&:hover": {
+              bgcolor: "rgba(148,163,184,0.05)",
+            },
           },
 
           "& .Mui-selected": {

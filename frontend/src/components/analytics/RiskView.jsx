@@ -32,6 +32,7 @@ import {
 } from "../guidanceUtils";
 import { classifyApiError } from "../../utils/apiErrors";
 import { getMissingForPage, resolveUserContext } from "../../utils/userContext";
+import { API_BASE_URL } from "../../config/api";
 
 // ── Theme-aligned semantic colors ──
 const C_PRIMARY = "#3B82F6";
@@ -136,12 +137,12 @@ export default function RiskDashboard() {
       const activePortfolioId = context.portfolio.id;
       const profileId = context.profile.id;
 
-      const results = await Promise.all([
-        axios.get(`http://127.0.0.1:8000/risk/portfolio/${activePortfolioId}`),
-        axios.get(`http://127.0.0.1:8000/risk/allocation/${activePortfolioId}`),
-        axios.get(`http://127.0.0.1:8000/risk/diversification/${activePortfolioId}`),
-        axios.get(`http://127.0.0.1:8000/risk/profile/${profileId}`)
-      ]);
+     const results = await Promise.all([
+  axios.get(`${API_BASE_URL}/risk/portfolio/${activePortfolioId}`),
+  axios.get(`${API_BASE_URL}/risk/allocation/${activePortfolioId}`),
+  axios.get(`${API_BASE_URL}/risk/diversification/${activePortfolioId}`),
+  axios.get(`${API_BASE_URL}/risk/profile/${profileId}`)
+]);
 
       setRisk(results[0].data);
       setAllocation(results[1].data);

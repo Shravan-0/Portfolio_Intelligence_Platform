@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config/api";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -38,14 +39,13 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      const response =
-        await axios.post(
-          "http://127.0.0.1:8000/auth/login",
-          {
-            email,
-            password,
-          }
-        );
+      const response = await axios.post(
+  `${API_BASE_URL}/auth/login`,
+  {
+    email,
+    password,
+  }
+);
         localStorage.setItem(
   "token",
   response.data.access_token

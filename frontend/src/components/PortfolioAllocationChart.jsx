@@ -16,7 +16,7 @@ import {
   Tooltip,
   Legend
 } from "recharts";
-
+import { API_BASE_URL } from "../config/api";
 const COLORS = [
   "#3B82F6",
   "#06B6D4",
@@ -58,10 +58,9 @@ export default function PortfolioAllocationChart() {
           return;
         }
 
-        const response =
-          await axios.get(
-            `http://127.0.0.1:8000/portfolios/${portfolio.id}/allocation`
-          );
+       const response = await axios.get(
+  `${API_BASE_URL}/portfolios/${portfolio.id}/allocation`
+);
 
         const formattedData =
           response.data.map(

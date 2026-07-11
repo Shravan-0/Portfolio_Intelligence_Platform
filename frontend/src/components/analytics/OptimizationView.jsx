@@ -46,8 +46,8 @@ import {
   getMissingForPage,
   resolveUserContext
 } from "../../utils/userContext";
+import { API_BASE_URL } from "../../config/api";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
 
 const COLOR_PRIMARY = "#3B82F6";
 const COLOR_SECONDARY = "#06B6D4";

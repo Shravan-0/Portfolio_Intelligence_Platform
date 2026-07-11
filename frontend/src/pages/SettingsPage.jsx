@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 
 import DashboardLayout from "../layouts/DashboardLayout";
+import { API_BASE_URL } from "../config/api";
 
 export default function SettingsPage() {
   const [user, setUser] =
@@ -23,16 +24,11 @@ export default function SettingsPage() {
     "token"
    );
 
-   const response =
-   await axios.get(
-     "http://127.0.0.1:8000/auth/me",
-    {
-      headers: {
-        Authorization:
-          `Bearer ${token}`
-      }
-    }
-   );
+  const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
       setUser(response.data);
 

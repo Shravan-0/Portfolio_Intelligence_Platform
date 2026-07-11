@@ -14,6 +14,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+import { API_BASE_URL } from "../config/api";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -67,22 +68,21 @@ export default function RegisterPage() {
       setLoading(true);
 
       await axios.post(
-        "http://127.0.0.1:8000/auth/register",
-        {
-          name,
-          email,
-          password,
-        }
-      );
+  `${API_BASE_URL}/auth/register`,
+  {
+    name,
+    email,
+    password,
+  }
+);
 
-      const loginResponse =
-        await axios.post(
-          "http://127.0.0.1:8000/auth/login",
-          {
-            email,
-            password,
-          }
-        );
+const loginResponse = await axios.post(
+  `${API_BASE_URL}/auth/login`,
+  {
+    email,
+    password,
+  }
+);
 
       localStorage.setItem(
         "token",

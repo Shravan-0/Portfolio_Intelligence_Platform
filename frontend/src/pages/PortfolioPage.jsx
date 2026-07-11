@@ -53,7 +53,7 @@ import { GUIDANCE } from "../components/guidanceUtils";
   import {
     resolveUserPortfolio
   } from "../utils/currentUser";
-
+import { API_BASE_URL } from "../config/api";
 
   const emptyAssetForm = {
     ticker: "",
@@ -637,11 +637,9 @@ import { GUIDANCE } from "../components/guidanceUtils";
 
           setPortfolioId(portfolio.id);
 
-          const portfolioResponse =
-            await axios.get(
-              `http://127.0.0.1:8000/analytics/portfolio/${portfolio.id}`
-            );
-
+          const portfolioResponse = await axios.get(
+  `${API_BASE_URL}/analytics/portfolio/${portfolio.id}`
+);
           setPortfolioData(
             portfolioResponse.data
           );
@@ -715,12 +713,12 @@ import { GUIDANCE } from "../components/guidanceUtils";
           );
 
         await axios.post(
-          "http://127.0.0.1:8000/portfolios",
-          {
-            name: portfolioName,
-            user_id: userId
-          }
-        );
+  `${API_BASE_URL}/portfolios`,
+  {
+    name: portfolioName,
+    user_id: userId
+  }
+);
         setPortfolioName("");
         sessionStorage.setItem("portfolioCreated", "true");
         window.location.reload();

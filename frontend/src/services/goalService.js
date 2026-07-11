@@ -8,7 +8,7 @@ export const createGoal = async (
 
   const response =
     await axios.post(
-      `${API_URL}/goals`,
+      `${API_BASE_URL}/goals`,
       goalData
     );
 
@@ -22,7 +22,7 @@ export const updateGoal = async (
 
   const response =
     await axios.put(
-      `${API_URL}/goals/${goalId}`,
+      `${API_BASE_URL}/goals/${goalId}`,
       goalData
     );
 
@@ -35,7 +35,7 @@ export const getGoal = async (
 
   const response =
     await axios.get(
-      `${API_URL}/goals/${goalId}`
+      `${API_BASE_URL}/goals/${goalId}`
     );
 
   return response.data;
@@ -47,7 +47,7 @@ export const deleteGoal = async (
 
   const response =
     await axios.delete(
-      `${API_URL}/goals/${goalId}`
+      `${API_BASE_URL}/goals/${goalId}`
     );
 
   return response.data;

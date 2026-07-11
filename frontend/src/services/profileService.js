@@ -4,7 +4,7 @@ import { API_BASE_URL } from "../config/api";
 
 export const createProfile = async (profileData) => {
   const response = await axios.post(
-    `${API_URL}/profiles/`,
+    `${API_BASE_URL}/profiles/`,
     profileData
   );
 
@@ -13,7 +13,7 @@ export const createProfile = async (profileData) => {
 
 export const getProfiles = async () => {
   const response = await axios.get(
-    `${API_URL}/profiles/`
+    `${API_BASE_URL}/profiles/`
   );
 
   return response.data;
@@ -26,7 +26,7 @@ export const updateProfile = async (
 
   const response =
     await axios.put(
-      `${API_URL}/profiles/${profileId}`,
+      `${API_BASE_URL}/profiles/${profileId}`,
       profileData
     );
 

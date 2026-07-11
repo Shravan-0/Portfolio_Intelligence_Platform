@@ -8,7 +8,7 @@ export const getRiskProfile = async (
 
   const response =
     await axios.get(
-      `${API_URL}/risk/profile/${profileId}`
+      `${API_BASE_URL}/risk/profile/${profileId}`
     );
 
   return response.data;
@@ -20,7 +20,7 @@ export const getPortfolioRisk = async (
 
   const response =
     await axios.get(
-      `${API_URL}/risk/portfolio/${portfolioId}`
+      `${API_BASE_URL}/risk/portfolio/${portfolioId}`
     );
 
   return response.data;
@@ -32,7 +32,7 @@ export const getAssetAllocation = async (
 
   const response =
     await axios.get(
-      `${API_URL}/risk/allocation/${portfolioId}`
+      `${API_BASE_URL}/risk/allocation/${portfolioId}`
     );
 
   return response.data;
@@ -44,7 +44,7 @@ export const getDiversification = async (
 
   const response =
     await axios.get(
-      `${API_URL}/risk/diversification/${portfolioId}`
+      `${API_BASE_URL}/risk/diversification/${portfolioId}`
     );
 
   return response.data;

@@ -8,7 +8,7 @@ export const getRebalance = async (
 
   const response =
     await axios.get(
-      `${API_URL}/optimization/rebalance/${profileId}`
+      `${API_BASE_URL}/optimization/rebalance/${profileId}`
     );
 
   return response.data;
@@ -19,7 +19,7 @@ export const getRecommendations =
 
     const response =
       await axios.get(
-        `${API_URL}/optimization/recommendations/${profileId}`
+        `${API_BASE_URL}/optimization/recommendations/${profileId}`
       );
 
     return response.data;
@@ -30,7 +30,7 @@ export const getPortfolioHealth =
 
     const response =
       await axios.get(
-        `${API_URL}/optimization/health/${portfolioId}`
+        `${API_BASE_URL}/optimization/health/${portfolioId}`
       );
 
     return response.data;

@@ -193,4 +193,18 @@ def versions():
 @app.get("/headers")
 def headers(request: Request):
     return dict(request.headers)
+
+##now added
+@app.get("/debug/routes")
+def debug_routes():
+    return sorted(
+        [
+            {
+                "path": route.path,
+                "methods": list(route.methods)
+            }
+            for route in app.routes
+        ],
+        key=lambda x: x["path"]
+    )
 ##

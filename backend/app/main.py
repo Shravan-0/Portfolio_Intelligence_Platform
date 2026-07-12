@@ -3,6 +3,12 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+##temp
+import fastapi
+import starlette
+import uvicorn
+from fastapi import Request
+##
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,7 +65,8 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Portfolio_Intelligence_Platform",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=False,
 )
 
 # CORS
@@ -157,3 +164,19 @@ def db_test():
         return {
             "database": "connected"
         }
+
+
+###temp
+@app.get("/versions")
+def versions():
+    return {
+        "fastapi": fastapi.__version__,
+        "starlette": starlette.__version__,
+        "uvicorn": uvicorn.__version__,
+    }
+
+
+@app.get("/headers")
+def headers(request: Request):
+    return dict(request.headers)
+##

@@ -18,7 +18,7 @@ export const getPortfolios =
 
     const response =
       await axios.get(
-        `${API_BASE_URL}/portfolios`
+        `${API_BASE_URL}/portfolios/`
       );
 
     return response.data;

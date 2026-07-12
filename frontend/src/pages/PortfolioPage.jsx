@@ -713,7 +713,7 @@ import { API_BASE_URL } from "../config/api";
           );
 
         await axios.post(
-  `${API_BASE_URL}/portfolios`,
+  `${API_BASE_URL}/portfolios/`,
   {
     name: portfolioName,
     user_id: userId

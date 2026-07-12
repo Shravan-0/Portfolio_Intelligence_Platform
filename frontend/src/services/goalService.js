@@ -8,7 +8,7 @@ export const createGoal = async (
 
   const response =
     await axios.post(
-      `${API_BASE_URL}/goals/`,
+      `${API_BASE_URL}/goals`,
       goalData
     );
 

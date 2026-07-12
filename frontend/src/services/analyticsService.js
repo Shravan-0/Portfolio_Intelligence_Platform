@@ -29,7 +29,7 @@ export const getGoals = async () => {
   }
 
   const response = await axios.get(
-    `${API_BASE_URL}/goals/`,
+    `${API_BASE_URL}/goals`,
     {
       params: {
         user_id: userId

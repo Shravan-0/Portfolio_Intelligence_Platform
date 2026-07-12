@@ -8,7 +8,21 @@ import "simplebar-react/dist/simplebar.min.css";
 import App from "./App";
 import theme from "./theme/theme";
 
+/*axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});*/
 axios.interceptors.request.use((config) => {
+  console.log("===== AXIOS REQUEST =====");
+  console.log("baseURL:", config.baseURL);
+  console.log("url:", config.url);
+  console.log("full:", (config.baseURL || "") + config.url);
+
   const token = localStorage.getItem("token");
 
   if (token) {

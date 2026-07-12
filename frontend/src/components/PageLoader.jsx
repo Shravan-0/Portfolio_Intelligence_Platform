@@ -7,7 +7,7 @@ export default function PageLoader({ message = "Loading..." }) {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      minHeight={280}
+      style={{ minHeight: 280 }}
       gap={2}
     >
       <CircularProgress size={36} thickness={4} sx={{ color: "primary.main" }} />

@@ -1,162 +1,221 @@
 # Portfolio Intelligence Platform
 
-A full-stack Portfolio Intelligence & Risk Analytics Platform built with **React**, **FastAPI**, and **PostgreSQL**. The platform enables investors to create portfolios, analyze performance, evaluate risk, optimize asset allocation, simulate future outcomes, and generate portfolio reports through an interactive dashboard.
 
+A full-stack **Portfolio Intelligence & Risk Analytics Platform** built with React, FastAPI, and PostgreSQL. It allows investors to build portfolios, track performance, assess risk, optimize asset allocation, run simulations, and generate reports — all through an interactive dashboard.
+
+---
+
+## Table of Contents
+
+- [Live Demo](#live-demo)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+- [Screenshots](#screenshots)
+- [Getting Started](#getting-started)
+- [API Modules](#api-modules)
+- [Documentation](#documentation)
+- [Roadmap](#roadmap)
+- [License](#license)
+
+---
+
+## 🌐 Live Demo
+
+| Resource | Link |
+|---|---|
+| Frontend | [Open App](https://portfolio-intelligence-platform-tbb.vercel.app) |
+| Backend API | [Railway API](https://portfoliointelligenceplatform-production.up.railway.app) |
+| API Docs | [Swagger UI](https://portfoliointelligenceplatform-production.up.railway.app/docs) |
+
+---
+
+## 🎥 Demo Video
+
+🚧 **Coming Soon**
+
+A complete walkthrough of the application, including portfolio management, analytics, optimization, risk analysis, and report generation, will be uploaded soon.
+
+*( link will be added here.)*
 ---
 
 ## Features
 
 ### Portfolio Management
 - User authentication and authorization
-- Investor profile management
-- Financial goal management
-- Portfolio creation and management
-- Asset management (CRUD)
+- Investor profile and financial goal management
+- Portfolio and asset creation (CRUD)
 - Live portfolio valuation
-- Portfolio allocation visualization
+- Allocation visualization
 
 ### Portfolio Analytics
-- Portfolio performance tracking
-- Benchmark comparison
+- Performance tracking and benchmark comparison
 - Portfolio health score
-- Diversification analysis
-- Correlation matrix
+- Diversification and correlation analysis
 - Factor exposure analysis
 - Efficient Frontier visualization
 - Monte Carlo simulation
 - Goal success probability
-- Portfolio optimization recommendations
+- Optimization recommendations
 
 ### Risk Analytics
-- Volatility
-- Sharpe Ratio
-- Beta
+- Volatility, Sharpe Ratio, Beta
 - Maximum Drawdown
-- Risk Score
-- Diversification Score
-- Asset Allocation Analysis
+- Risk score and diversification score
+- Asset allocation analysis
 
 ### Reporting
-- Portfolio report generation (PDF)
-- Report history
-- Version tracking
+- PDF report generation
+- Report history and version tracking
 
 ---
 
-# Tech Stack
+## Tech Stack
 
-## Frontend
+**Frontend:** React · Material UI · Recharts · Axios · Vite
 
-- React
-- Material UI
-- Recharts
-- Axios
-- Vite
+**Backend:** FastAPI · SQLAlchemy · Pydantic
 
-## Backend
+**Database:** PostgreSQL
 
-- FastAPI
-- SQLAlchemy
-- Pydantic
-
-## Database
-
-- PostgreSQL
-
-## Financial & Analytics Libraries
-
-- NumPy
-- Pandas
-- PyPortfolioOpt
-- StatsModels
-- yfinance
-- ReportLab
+**Analytics & Finance:** NumPy · Pandas · PyPortfolioOpt · StatsModels · yfinance · ReportLab
 
 ---
 
-# Project Structure
+## Project Structure
 
-```text
+```
 Portfolio_Intelligence_Platform/
-│
 ├── backend/
 ├── frontend/
 ├── database/
 ├── docker/
 ├── docs/
 ├── tests/
-│
 ├── README.md
 ├── LICENSE
-├── .env.example
-└── .gitignore
+└── .env.example
 ```
 
 ---
 
-# Screenshots
+## Architecture
 
-> Add screenshots inside the `screenshots/` folder.
-
-- Dashboard
-- Portfolio
-- Analytics
-- Reports
-- Profile
-- Risk Analysis
+```
+React Frontend
+      │
+      ▼
+FastAPI REST API
+      │
+      ▼
+Business Services
+      │
+      ▼
+SQLAlchemy ORM
+      │
+      ▼
+PostgreSQL
+```
+For detailed architecture diagrams, ER diagrams, sequence diagrams, and technical documentation, see the `docs/` directory.
 
 ---
 
-# Installation
+## Screenshots
 
-## Clone Repository
+### Login Page
+
+![Login Page](screenshots/Login_page.png)
+
+---
+
+### Dashboard
+
+#### Overview
+
+![Dashboard Overview](screenshots/Dashboard(1).png)
+
+#### Performance
+
+![Dashboard Performance](screenshots/Dashboard(2).png)
+
+---
+
+### Planning
+
+![Planning](screenshots/Planning.png)
+
+---
+
+### Portfolio
+
+#### Portfolio Overview
+
+![Portfolio Overview](screenshots/portfolio(1).png)
+
+#### Portfolio Holdings
+
+![Portfolio Holdings](screenshots/portfolio(2).png)
+
+---
+
+### Analytics
+
+#### Overview
+
+![Analytics Overview](screenshots/Analytics_Ov(1).png)
+
+![Analytics Overview Continued](screenshots/Analytics_Ov(2).png)
+
+#### Risk Analytics
+
+![Risk Analytics](screenshots/Analytics_risk.png)
+
+#### Portfolio Optimization
+
+![Portfolio Optimization](screenshots/Analytics_opt(1).png)
+
+![Optimization Recommendations](screenshots/Analytics_opt(2).png)
+
+---
+
+### Reports
+
+![Reports](screenshots/Reports.png)
+
+
+---
+
+## Getting Started
+
+### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Shravan-0/Portfolio_Intelligence_Platform.git
 cd Portfolio_Intelligence_Platform
 ```
 
-## Backend
+### 2. Backend setup
 
 ```bash
 cd backend
-
 python -m venv venv
-
 venv\Scripts\activate
-
 pip install -r requirements.txt
-
 uvicorn app.main:app --reload
 ```
 
-Backend:
-
-```
-http://localhost:8000
-```
-
----
-
-## Frontend
+### 3. Frontend setup
 
 ```bash
 cd frontend
-
 npm install
-
 npm run dev
-```
-
-Frontend:
-
-```
-http://localhost:5173
 ```
 
 ---
 
-# API Modules
+## API Modules
 
 - Authentication
 - Investor Profile
@@ -173,38 +232,36 @@ http://localhost:5173
 
 ---
 
-# Architecture
+## Documentation
 
-```
-React Frontend
-        │
-        ▼
-FastAPI REST API
-        │
-        ▼
-Business Services
-        │
-        ▼
-SQLAlchemy ORM
-        │
-        ▼
-PostgreSQL
-```
+Full documentation is available in the [`docs/`](./docs) directory, including:
+
+- Project Overview
+- Product Requirements Document (PRD)
+- System Architecture
+- Database Design
+- API Specification
+- Backend & Frontend Architecture
+- Risk Engine Design
+- Monte Carlo Engine
+- Efficient Frontier
+- Factor Exposure Analysis
+- Development Roadmap
 
 ---
 
-# Future Improvements
+## Roadmap
 
-- Live market streaming
-- Transaction history
-- Portfolio rebalancing automation
-- Multi-benchmark comparison
-- Advanced stress testing
-- Docker deployment
-- CI/CD pipeline
+- [ ] Live market data streaming
+- [ ] Transaction history
+- [ ] Automated portfolio rebalancing
+- [ ] Multi-benchmark comparison
+- [ ] Advanced stress testing
+- [ ] Docker deployment
+- [ ] CI/CD pipeline
 
 ---
 
-# License
+## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](./LICENSE).

@@ -77,9 +77,14 @@ A complete walkthrough of the application, including portfolio management, analy
 
 **Backend:** FastAPI · SQLAlchemy · Pydantic
 
-**Database:** PostgreSQL
+**Database:** PostgreSQL (Neon Cloud)
 
 **Analytics & Finance:** NumPy · Pandas · PyPortfolioOpt · StatsModels · yfinance · ReportLab
+
+**Deployment:**
+- Frontend: Vercel
+- Backend: Railway
+- Database: Neon
 
 ---
 
@@ -103,19 +108,19 @@ Portfolio_Intelligence_Platform/
 ## Architecture
 
 ```
-React Frontend
-      │
-      ▼
-FastAPI REST API
-      │
-      ▼
+React Frontend (Vercel)
+        │
+        ▼
+FastAPI REST API (Railway)
+        │
+        ▼
 Business Services
-      │
-      ▼
+        │
+        ▼
 SQLAlchemy ORM
-      │
-      ▼
-PostgreSQL
+        │
+        ▼
+PostgreSQL (Neon Cloud)
 ```
 For detailed architecture diagrams, ER diagrams, sequence diagrams, and technical documentation, see the `docs/` directory.
 
@@ -252,12 +257,10 @@ Full documentation is available in the [`docs/`](./docs) directory, including:
 
 ## Roadmap
 
-- [ ] Live market data streaming
 - [ ] Transaction history
-- [ ] Automated portfolio rebalancing
 - [ ] Multi-benchmark comparison
 - [ ] Advanced stress testing
-- [ ] Docker deployment
+- [ ] Docker containerization
 - [ ] CI/CD pipeline
 
 ---

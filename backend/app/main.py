@@ -69,6 +69,20 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
+#temp
+from fastapi import Request
+
+@app.middleware("http")
+async def debug_requests(request: Request, call_next):
+    print(
+        f"{request.method} {request.url.path} "
+        f"Authorization={request.headers.get('authorization')}"
+    )
+    response = await call_next(request)
+    print(f"Status={response.status_code}")
+    return response
+##temp
+
 # CORS
 app.add_middleware(
     CORSMiddleware,

@@ -93,3 +93,6 @@ project_structure.txt
 
 *.bak
 *.orig
+
+# Generated reports
+backend/app/reports/*.pdf

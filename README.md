@@ -33,11 +33,7 @@ A full-stack **Portfolio Intelligence & Risk Analytics Platform** built with Rea
 
 ## 🎥 Demo Video
 
-🚧 **Coming Soon**
-
-A complete walkthrough of the application, including portfolio management, analytics, optimization, risk analysis, and report generation, will be uploaded soon.
-
-*( link will be added here.)*
+https://www.loom.com/share/2e22a92590a3446880cab962a11be690
 ---
 
 ## Features

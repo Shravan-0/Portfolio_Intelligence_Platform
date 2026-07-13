@@ -168,7 +168,7 @@ const loginResponse = await axios.post(
           color="white"
           mb={1}
         >
-          Portfolio_Intelligence_Platform
+          Portfolio Intelligence Platform
         </Typography>
 
         <Typography
